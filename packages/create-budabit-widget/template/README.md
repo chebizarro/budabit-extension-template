@@ -1,6 +1,6 @@
-# My BudaBit Widget
+# My Budabit Widget
 
-A [BudaBit](https://budabit.com) Smart Widget extension.
+A [Budabit](https://budabit.dev) Smart Widget extension using `budabit-sdk@^0.2.0`.
 
 ## What is a Smart Widget?
 
@@ -75,7 +75,14 @@ bridge.onEvent('widget:init', (payload) => {
   console.log('Host version:', payload.hostVersion);
 });
 
-// Know when bridge is ready for operations
+// Receive repo-scoped context changes.
+bridge.onEvent('context:repoUpdate', (repo) => {
+  console.log('Repository:', repo?.repoName);
+});
+
+// Register initial handlers, then tell the host setup is complete.
+bridge.signalReady();
+
 bridge.onEvent('widget:mounted', (payload) => {
   console.log('Mounted at:', payload.mountedAt);
 });
@@ -86,6 +93,8 @@ bridge.onEvent('widget:unmounting', (payload) => {
   bridge.destroy();
 });
 ```
+
+The demo keeps the deprecated `context:update` listener commented out as an opt-in fallback for older hosts.
 
 ## Permissions
 

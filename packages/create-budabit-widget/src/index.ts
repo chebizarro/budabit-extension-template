@@ -54,7 +54,7 @@ function scaffold(projectName: string, options: ScaffoldOptions) {
 
   // Resolve SDK path for --local mode
   const sdkDir = resolve(__dirname, '..', '..', 'sdk');
-  const sdkRef = options.local ? `file:${sdkDir}` : '^0.1.0';
+  const sdkRef = options.local ? `file:${sdkDir}` : '^0.2.0';
 
   if (options.local) {
     console.log(`  Using local SDK: ${sdkDir}`);
@@ -73,7 +73,7 @@ function scaffold(projectName: string, options: ScaffoldOptions) {
   if (rootPkg.scripts) {
     for (const [key, val] of Object.entries(rootPkg.scripts)) {
       if (typeof val === 'string') {
-        rootPkg.scripts[key] = (val as string)
+        rootPkg.scripts[key] = val
           .replace(/@my-widget\/iframe/g, `@${packageName}/iframe`)
           .replace(/--identifier 'my-widget'/g, `--identifier '${packageName}'`)
           .replace(/--title 'My Widget'/g, `--title '${packageName}'`);
@@ -97,7 +97,7 @@ function scaffold(projectName: string, options: ScaffoldOptions) {
   const readmePath = join(targetDir, 'README.md');
   if (existsSync(readmePath)) {
     const readme = readFileSync(readmePath, 'utf-8');
-    writeFileSync(readmePath, readme.replace('# My BudaBit Widget', `# ${packageName}`));
+    writeFileSync(readmePath, readme.replace('# My Budabit Widget', `# ${packageName}`));
   }
 
   // Initialize git

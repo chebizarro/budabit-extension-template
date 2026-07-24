@@ -91,7 +91,7 @@ interface PendingRequest {
 /**
  * Mock Smart Widget bridge for testing action-based request/response/event protocol.
  *
- * Matches BudaBit's wire messages:
+ * Matches Budabit's wire messages:
  *   { type: 'request'|'response'|'event', action: string, payload?: any, id?: string }
  */
 export class MockWidgetBridge {

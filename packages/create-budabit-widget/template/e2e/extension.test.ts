@@ -198,17 +198,3 @@ test.describe('Extension — Bridge Actions', () => {
   });
 });
 
-test.describe('Extension — Backward Compatibility', () => {
-  test('should handle deprecated context:update event', async ({ page }) => {
-    await page.goto('/');
-
-    await sendHostEvent(page, 'context:update', {
-      contextId: 'legacy-room-123',
-      userPubkey: 'legacy-pubkey',
-      relays: ['wss://relay.damus.io'],
-    });
-
-    // Should still show connected status via deprecated path
-    await expect(page.locator('.status')).toContainText('Connected');
-  });
-});

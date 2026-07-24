@@ -205,7 +205,7 @@ Create `host-test.html` next to the repo root and open it in your browser:
 ### Key patterns
 
 ```typescript
-import { WidgetBridge } from '@budabit/ext-shared'
+import { WidgetBridge } from 'budabit-sdk'
 
 const bridge = new WidgetBridge()
 
@@ -238,7 +238,7 @@ const sub = bridge.subscribe({
   relays: ["wss://relay.example.com"],
   filter: { kinds: [30301] },
 })
-bridge.onEvent("nostr:event", ({ subscriptionId, event }) => { ... })
+bridge.onEvent("nostr:subscription:event", ({ subscriptionId, event }) => { ... })
 
 // 6. Resize iframe
 await bridge.request("ui:resize", { height: 800 })

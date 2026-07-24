@@ -132,20 +132,95 @@ describe('WidgetBridge', () => {
     });
   });
 
+  describe('subscribe()', () => {
+    it('uses the host-returned subscription ID for unsubscribe and destroy', async () => {
+      const pending = bridge.subscribe({
+        subscriptionId: 'client-id',
+        relays: ['wss://relay.example'],
+        filter: { kinds: [1] },
+      });
+      const subscribeMessage = targetWindow.postMessage.mock.calls[0][0] as TestWireMessage;
+
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          data: {
+            type: 'response',
+            id: subscribeMessage.id,
+            action: 'nostr:subscribe',
+            payload: { status: 'ok', subscriptionId: 'host-id' },
+          },
+          source: targetWindow,
+          origin: window.location.origin,
+        })
+      );
+
+      const subscription = await pending;
+      expect(subscription.subscriptionId).toBe('host-id');
+
+      const unsubscribe = subscription.unsubscribe();
+      const unsubscribeMessage = targetWindow.postMessage.mock.calls.at(-1)?.[0] as TestWireMessage;
+      expect(unsubscribeMessage).toMatchObject({
+        action: 'nostr:unsubscribe',
+        payload: { subscriptionId: 'host-id' },
+      });
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          data: {
+            type: 'response',
+            id: unsubscribeMessage.id,
+            action: 'nostr:unsubscribe',
+            payload: { status: 'ok' },
+          },
+          source: targetWindow,
+          origin: window.location.origin,
+        })
+      );
+      await unsubscribe;
+
+      const secondPending = bridge.subscribe({
+        subscriptionId: 'second-client-id',
+        relays: ['wss://relay.example'],
+        filter: { kinds: [2] },
+      });
+      const secondMessage = targetWindow.postMessage.mock.calls.at(-1)?.[0] as TestWireMessage;
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          data: {
+            type: 'response',
+            id: secondMessage.id,
+            action: 'nostr:subscribe',
+            payload: { status: 'ok', subscriptionId: 'second-host-id' },
+          },
+          source: targetWindow,
+          origin: window.location.origin,
+        })
+      );
+      await secondPending;
+
+      targetWindow.postMessage.mockClear();
+      bridge.destroy();
+      expect(targetWindow.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'nostr:unsubscribe',
+          payload: { subscriptionId: 'second-host-id' },
+        }),
+        '*'
+      );
+    });
+  });
+
   describe('onRequest()', () => {
     it('should respond to host request with handler result', async () => {
-      // Create a bridge that uses window.parent as targetWindow so source checks pass
+      const handler = vi.fn().mockResolvedValue({ data: 'result' });
+
+      // Mock source window for response
+      const mockSource = { postMessage: vi.fn() };
       const reqBridge = new WidgetBridge({
-        targetWindow: window.parent,
+        targetWindow: mockSource as unknown as Window,
         targetOrigin: '*',
         timeoutMs: 1000,
       });
-
-      const handler = vi.fn().mockResolvedValue({ data: 'result' });
       reqBridge.onRequest('custom:action', handler);
-
-      // Spy on window.parent.postMessage to capture response
-      const postSpy = vi.spyOn(window.parent, 'postMessage');
 
       window.dispatchEvent(
         new MessageEvent('message', {
@@ -155,25 +230,24 @@ describe('WidgetBridge', () => {
             action: 'custom:action',
             payload: { input: 'test' },
           },
-          source: window.parent,
-          origin: 'http://localhost',
+          source: mockSource as unknown as Window,
+          origin: window.location.origin,
         })
       );
 
       await new Promise((r) => setTimeout(r, 10));
 
       expect(handler).toHaveBeenCalledWith({ input: 'test' });
-      expect(postSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
+      expect(mockSource.postMessage).toHaveBeenCalledWith(
+        {
           type: 'response',
           id: 'host-req-1',
           action: 'custom:action',
           payload: { data: 'result' },
-        }),
-        expect.any(String)
+        },
+        window.location.origin
       );
 
-      postSpy.mockRestore();
       reqBridge.destroy();
     });
   });

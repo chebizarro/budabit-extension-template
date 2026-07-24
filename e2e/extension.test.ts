@@ -12,17 +12,17 @@ test.describe('Extension', () => {
     await expect(page.locator('input[type="text"]')).toBeVisible();
   });
 
-  test('should handle context:update event from host (optional demo)', async ({ page }) => {
+  test('should handle widget:init event from host', async ({ page }) => {
     await page.goto('/');
 
     await page.evaluate(() => {
       window.postMessage(
         {
           type: 'event',
-          action: 'context:update',
+          action: 'widget:init',
           payload: {
-            contextId: 'test-room-123',
-            userPubkey: 'test-pubkey-abc123',
+            pubkey: 'test-pubkey-abc123',
+            hostVersion: '1.2.3',
             relays: ['wss://relay.damus.io'],
           },
         },
@@ -32,7 +32,7 @@ test.describe('Extension', () => {
 
     await expect(page.locator('.status')).toContainText('Connected');
     await expect(page.locator('.context')).toBeVisible();
-    await expect(page.locator('.context')).toContainText('test-room-123');
+    await expect(page.locator('.context')).toContainText('1.2.3');
     await expect(page.locator('.context')).toContainText('test-pubkey-abc123');
     await expect(page.locator('.context')).toContainText('wss://relay.damus.io');
   });

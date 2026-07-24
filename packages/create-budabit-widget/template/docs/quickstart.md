@@ -238,7 +238,7 @@ const sub = bridge.subscribe({
   relays: ["wss://relay.example.com"],
   filter: { kinds: [30301] },
 })
-bridge.onEvent("nostr:event", ({ subscriptionId, event }) => { ... })
+bridge.onEvent("nostr:subscription:event", ({ subscriptionId, event }) => { ... })
 
 // 6. Resize iframe
 await bridge.request("ui:resize", { height: 800 })

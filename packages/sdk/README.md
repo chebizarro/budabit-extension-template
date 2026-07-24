@@ -1,11 +1,11 @@
 # budabit-sdk
 
-SDK for building [Budabit](https://budabit.com) Smart Widget extensions.
+SDK for building [Budabit](https://budabit.dev) Smart Widget extensions.
 
 ## Install
 
 ```bash
-npm install budabit-sdk
+npm install budabit-sdk@^0.2.0
 ```
 
 ## Usage
@@ -28,12 +28,30 @@ const result = await bridge.request('nostr:publish', {
   created_at: Math.floor(Date.now() / 1000),
 });
 
-// Listen for context updates from host
-bridge.onEvent('context:update', (ctx) => {
-  console.log('Context:', ctx.contextId, ctx.userPubkey);
+// Receive initial host context.
+bridge.onEvent('widget:init', (payload) => {
+  console.log('Host version:', payload.hostVersion);
 });
 
-// Cleanup
+// Receive repository-scoped context changes.
+bridge.onEvent('context:repoUpdate', (repo) => {
+  console.log('Repository:', repo?.repoName);
+});
+
+// Call once after registering initial handlers.
+bridge.signalReady();
+
+// Subscription events use the host-assigned ID returned by subscribe().
+const subscription = await bridge.subscribe({
+  subscriptionId: 'client-label',
+  relays: ['wss://relay.example.com'],
+  filter: { kinds: [1], limit: 20 },
+});
+bridge.onEvent('nostr:subscription:event', ({ subscriptionId, event }) => {
+  if (subscriptionId === subscription.subscriptionId) console.log(event);
+});
+
+// Cleanup also unsubscribes any still-open subscriptions.
 bridge.destroy();
 ```
 
@@ -93,6 +111,10 @@ import { createWorkerBridge } from 'budabit-sdk/worker';
 const bridge = createWorkerBridge((msg) => self.postMessage(msg));
 self.addEventListener('message', (e) => bridge.handleMessage(e.data));
 ```
+
+## Typed host actions
+
+Version 0.2.0 includes typed requests for Nostr publish/query/sign/NIP-44 encryption/subscriptions, storage, repository context, toast/resize/navigation, plus string overloads for host-specific actions.
 
 ## Subpath Exports
 

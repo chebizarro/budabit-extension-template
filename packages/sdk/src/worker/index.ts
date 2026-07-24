@@ -13,7 +13,7 @@ interface PendingRequest {
 /**
  * Worker bridge for headless Smart Widget logic.
  *
- * This is intentionally a stub, but it is consistent with BudaBit's wire protocol:
+ * This is intentionally a stub, but it is consistent with Budabit's wire protocol:
  *   { type: 'request' | 'response' | 'event', action: string, payload?: unknown, id?: string }
  *
  * Use cases:
@@ -136,7 +136,6 @@ export function createWorkerBridge(
 
   const handleMessage = async (message: WidgetWireMessage): Promise<void> => {
     // Stub-friendly logging; extension authors can customize.
-    // eslint-disable-next-line no-console
     console.log('Worker received message:', message);
 
     if (message.type === 'response') {

@@ -29,7 +29,7 @@ export interface SmartWidgetEventOptions {
   buttonTitle: string;
   /** Permissions (maps to `permission` tags). */
   permissions?: WidgetPermission[];
-  /** Optional client tag metadata (used by BudaBit as an origin hint). */
+  /** Optional client tag metadata (used by Budabit as an origin hint). */
   client?: {
     name: string;
     originHint?: string;
@@ -44,7 +44,7 @@ export interface SmartWidgetEventOptions {
 
 function deriveIdentifier(title: string, appUrl: string): string {
   // Stable, URL+title derived identifier. Keeps output deterministic if caller omits identifier.
-  // NOTE: The `d` tag can be any string; BudaBit uses it as a settings key.
+  // NOTE: The `d` tag can be any string; Budabit uses it as a settings key.
   const digest = createHash('sha256')
     .update(`${title}\n${appUrl}`)
     .digest('hex');
@@ -56,7 +56,7 @@ function deriveIdentifier(title: string, appUrl: string): string {
  *
  * This output is UNSIGNED. The host/author should sign it with nostr-tools and publish to relays.
  *
- * Tags emitted match BudaBit's parseSmartWidget():
+ * Tags emitted match Budabit's parseSmartWidget():
  * - ["d", identifier]
  * - ["l", widgetType]
  * - ["image", imageUrl]
@@ -132,7 +132,7 @@ export interface WidgetJsonOptions {
 /**
  * Generate the optional `/.well-known/widget.json` discovery file.
  *
- * NOTE: This file is part of the NIP-XX ecosystem (YakiHonne tooling). BudaBit primarily
+ * NOTE: This file is part of the NIP-XX ecosystem (YakiHonne tooling). Budabit primarily
  * installs widgets via the kind 30033 event (naddr), but emitting this helps interoperability.
  */
 export function generateWidgetJson(options: WidgetJsonOptions): string {
@@ -169,7 +169,7 @@ export function generatePublishingInstructions(): string {
 
 ## Recommended Relays
 
-BudaBit currently discovers Smart Widgets via YakiHonne relays (and naddr relay hints):
+Budabit currently discovers Smart Widgets via YakiHonne relays (and naddr relay hints):
 
 - \`wss://relay.yakihonne.com\`
 
@@ -209,14 +209,14 @@ console.log('Event id:', signed.id);
 console.log('naddr:', naddr);
 \`\`\`
 
-## Install in BudaBit
+## Install in Budabit
 
 - Copy the printed \`naddr\`
-- In BudaBit: Settings → Extensions → Install Smart Widget (naddr)
+- In Budabit: Settings → Extensions → Install Smart Widget (naddr)
 
 ## Notes
 
-- For \`action\`/ \`tool\` widgets, BudaBit extracts the iframe URL from the first \`button\` tag with type \`app\`.
+- For \`action\`/ \`tool\` widgets, Budabit extracts the iframe URL from the first \`button\` tag with type \`app\`.
 - Permissions are read from \`permission\` (or \`perm\`) tags and compared to requested bridge actions (e.g., \`nostr:publish\`).
 `;
 }

@@ -120,11 +120,11 @@ describe('generateSmartWidgetEvent()', () => {
   it('should add client tag when provided', () => {
     const event = generateSmartWidgetEvent({
       ...baseOptions,
-      client: { name: 'budabit', originHint: 'https://budabit.com' },
+      client: { name: 'budabit', originHint: 'https://budabit.dev' },
     });
 
     const clientTag = event.tags.find((t) => t[0] === 'client');
-    expect(clientTag).toEqual(['client', 'budabit', 'https://budabit.com']);
+    expect(clientTag).toEqual(['client', 'budabit', 'https://budabit.dev']);
   });
 
   it('should use custom createdAt timestamp', () => {

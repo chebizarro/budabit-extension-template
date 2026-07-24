@@ -58,7 +58,7 @@ interface WidgetInitPayload {
 **Usage Example:**
 
 ```typescript
-import { createWidgetBridge } from '@budabit/ext-shared';
+import { createWidgetBridge } from 'budabit-sdk';
 
 const bridge = createWidgetBridge();
 
@@ -190,7 +190,7 @@ export interface WidgetUnmountingPayload {
 }
 
 // Extend WidgetActionMap with lifecycle events
-declare module '@budabit/ext-shared' {
+budabit-sdk
   interface WidgetActionMap {
     'widget:init': {
       event: WidgetInitPayload;
@@ -208,7 +208,7 @@ declare module '@budabit/ext-shared' {
 ## Complete Lifecycle Example
 
 ```typescript
-import { createWidgetBridge, type WidgetBridge } from '@budabit/ext-shared';
+import { createWidgetBridge, type WidgetBridge } from 'budabit-sdk';
 
 class MyWidget {
   private bridge: WidgetBridge;

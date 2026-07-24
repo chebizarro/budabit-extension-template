@@ -1,6 +1,6 @@
 {
   "name": "create-budabit-widget",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Scaffold a new Budabit Smart Widget extension project",
   "type": "module",
   "bin": {

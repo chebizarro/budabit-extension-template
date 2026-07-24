@@ -1,6 +1,6 @@
-# BudaBit Smart Widget Template
+# Budabit Smart Widget Template
 
-Reusable starter template for building BudaBit **Smart Widgets**.
+Reusable starter template for building Budabit **Smart Widgets** with `budabit-sdk@^0.2.0`.
 
 This template provides a production-ready foundation for creating **iframe-based Smart Widgets** that integrate with BudaBit using:
 
@@ -26,7 +26,7 @@ BudaBit discovers and renders widgets based on these events and enforces privile
 ## Template Features
 
 - Svelte 5 iframe app example (Smart Widget "tool" pattern)
-- Framework-agnostic shared bridge package with `signalReady()` and `subscribe()` helpers
+- `budabit-sdk` 0.2.0 with typed bridge, lifecycle, subscriptions, manifest tooling, worker bridge, and test helpers
 - TypeScript strict mode
 - Monorepo via pnpm workspaces
 - Unit tests (Vitest) + E2E tests (Playwright)
@@ -155,7 +155,7 @@ bridge.onEvent('widget:unmounting', (payload) => {
 });
 ```
 
-For repository context changes, handle `context:repoUpdate`. To proactively fetch context, use `bridge.request('context:getRepo', {})`.
+For repository context changes, handle `context:repoUpdate`. To proactively fetch context, use `bridge.request('context:getRepo', {})`. After registering initial handlers, call `bridge.signalReady()` once so the host can complete mounting.
 
 ## Permissions
 
@@ -180,14 +180,13 @@ Only declared kinds (plus profiles and relay lists) can be queried/subscribed.
 ```
 budabit-extension-template/
 ├── packages/
-│   ├── shared/          # Framework-agnostic bridge + types + signaling helpers
-│   ├── iframe-app/      # Svelte 5 iframe app (Smart Widget tool demo)
-│   ├── worker/          # Optional stubbed worker bridge (action protocol)
-│   ├── manifest/        # CLI: generates kind 30033 + widget.json + instructions
-│   └── test-utils/      # Mocks for bridge/testing
-├── docs/                # Documentation (Smart Widget-focused)
-├── e2e/                 # Playwright E2E tests
-└── [config files]       # ESLint, Prettier, TypeScript, etc.
+│   ├── sdk/                     # Published budabit-sdk package and subpath exports
+│   ├── create-budabit-widget/   # Published scaffolder + generated-project template
+│   ├── iframe-app/              # Svelte 5 demo consuming the workspace SDK
+│   ├── shared|worker|manifest|test-utils/ # Source-compatible template packages
+├── docs/                        # Smart Widget documentation
+├── e2e/                         # Playwright E2E tests
+└── [config files]               # ESLint, Vitest, Vite, TypeScript, etc.
 ```
 
 ## Package Overview
@@ -210,7 +209,8 @@ Svelte 5 iframe app demonstrating a Smart Widget "tool":
 - Calls host actions via `bridge.request('nostr:publish', ...)`
 - Calls UI actions via `bridge.request('ui:toast', ...)`
 - Handles lifecycle events: `widget:init`, `widget:mounted`, `widget:unmounting`
-- Handles `context:repoUpdate` for repository context changes
+- Handles `widget:init` and `context:repoUpdate`, then calls `signalReady()` once
+- Keeps the deprecated `context:update` listener as a commented opt-in fallback
 
 ## Common Commands
 

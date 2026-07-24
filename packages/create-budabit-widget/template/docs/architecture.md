@@ -162,9 +162,9 @@ Widget iframe                         Host
     │ response {status: "ok"}          │
     │<─────────────────────────────────┤
     │                                  │
-    │ event nostr:event {event}        │  ← real-time
+    │ event nostr:subscription:event {event}        │  ← real-time
     │<─────────────────────────────────┤
-    │ event nostr:event {event}        │  ← real-time
+    │ event nostr:subscription:event {event}        │  ← real-time
     │<─────────────────────────────────┤
     │ event nostr:eose {relay}         │  ← stored events done
     │<─────────────────────────────────┤

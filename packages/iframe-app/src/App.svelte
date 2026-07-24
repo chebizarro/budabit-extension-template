@@ -6,7 +6,7 @@
     type UnsignedEvent,
     type WidgetInitPayload,
     type RepoContext,
-  } from '@budabit/ext-shared';
+  } from 'budabit-sdk';
 
   // Bridge + host-provided context
   let bridge = $state<WidgetBridge | null>(null);
@@ -47,13 +47,14 @@
       }
     });
 
-    // Also listen for deprecated context:update for backward compatibility
-    const offContextUpdate = b.onEvent('context:update', (ctx) => {
-      // Only use if we haven't received a repoUpdate and this isn't repo context
-      if (!repoContext && ctx && !('repoPubkey' in ctx)) {
-        status = 'Connected (context received via deprecated event)';
-      }
-    });
+    // Legacy fallback for hosts older than the current lifecycle API.
+    // Uncomment this block (and its cleanup below) only when supporting those hosts.
+    // `context:update` is deprecated and will be removed in v2.0.
+    // const offContextUpdate = b.onEvent('context:update', (ctx) => {
+    //   if (!repoContext && ctx && !('repoPubkey' in ctx)) {
+    //     status = 'Connected (context received via deprecated event)';
+    //   }
+    // });
 
     // Signal to the host that we're ready
     b.signalReady();
@@ -61,7 +62,7 @@
     return () => {
       offInit();
       offRepoUpdate();
-      offContextUpdate();
+      // offContextUpdate(); // Uncomment with the legacy fallback above.
       b.destroy();
       bridge = null;
     };
@@ -146,7 +147,7 @@
 
 <div class="container">
   <header>
-    <h1>BudaBit Smart Widget Template (Tool)</h1>
+    <h1>Budabit Smart Widget Template (Tool)</h1>
     <p class="status" class:ready={!!initPayload}>{status}</p>
   </header>
 

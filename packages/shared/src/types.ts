@@ -4,9 +4,9 @@ import type { Event as NostrEvent } from 'nostr-tools';
 export type { NostrEvent };
 
 /**
- * Shared types for BudaBit Smart Widgets (kind 30033) and the BudaBit host bridge.
+ * Shared types for Budabit Smart Widgets (kind 30033) and the Budabit host bridge.
  *
- * BudaBit's host runtime communicates with iframe widgets via an action-based postMessage protocol:
+ * Budabit's host runtime communicates with iframe widgets via an action-based postMessage protocol:
  *   { type: 'request'|'response'|'event', action: string, payload?: any, id?: string }
  *
  * Extensions depend ONLY on nostr-tools (no welshman). All relay operations go through the bridge.
@@ -14,6 +14,8 @@ export type { NostrEvent };
  * Host Bridge Actions (request → response):
  *   nostr:publish       — sign and publish a Nostr event
  *   nostr:query          — one-shot query (returns events after EOSE)
+ *   nostr:sign           — sign an event template without publishing
+ *   nostr:nip44Encrypt   — NIP-44 encrypt plaintext to a recipient pubkey
  *   nostr:subscribe      — open a persistent relay subscription
  *   nostr:unsubscribe    — close a persistent relay subscription
  *   storage:get          — get a value from per-extension storage
@@ -23,6 +25,7 @@ export type { NostrEvent };
  *   context:getRepo      — get the current repo context (if available)
  *   ui:toast             — show a toast notification in the host UI
  *   ui:resize            — request the host to resize the extension iframe
+ *   ui:navigate          — ask the host to navigate to an in-app path
  *
  * Host → Extension Events (one-way):
  *   widget:init          — initial context (pubkey, relays, host version, etc.)
@@ -30,7 +33,8 @@ export type { NostrEvent };
  *   widget:unmounting     — extension is about to be removed
  *   context:repoUpdate   — repo context has changed (for repo-scoped extensions)
  *   context:update       — @deprecated alias for context:repoUpdate (will be removed in v2.0)
- *   nostr:event          — a new event from a nostr:subscribe subscription
+ *   nostr:subscription:event — a new event from a nostr:subscribe subscription
+ *   nostr:event          — legacy alias for subscription events
  *   nostr:eose           — end of stored events for a subscription
  *
  * Extension → Host Events (one-way):
@@ -146,6 +150,19 @@ export type NostrUnsubscribeRequest = {
 };
 export type NostrUnsubscribeResponse = { status: 'ok' } | BridgeError;
 
+// --- nostr:sign ---
+
+export type NostrSignRequest = UnsignedEvent;
+export type NostrSignResponse = { status: 'ok'; event: NostrEvent } | BridgeError;
+
+// --- nostr:nip44Encrypt ---
+
+export type NostrNip44EncryptRequest = {
+  recipientPubkey: string;
+  plaintext: string;
+};
+export type NostrNip44EncryptResponse = { status: 'ok'; ciphertext: string } | BridgeError;
+
 // --- nostr:event (host → extension push) ---
 
 export type NostrSubscriptionEvent = {
@@ -200,6 +217,11 @@ export type UiToastResponse = { status: 'ok' } | BridgeError;
 export type UiResizeRequest = { height?: number; width?: number };
 export type UiResizeResponse = { status: 'ok' } | BridgeError;
 
+// --- ui:navigate ---
+
+export type UiNavigateRequest = { path: string };
+export type UiNavigateResponse = { status: 'ok' } | BridgeError;
+
 // ---------------------------------------------------------------------------
 // Action map (all supported bridge actions)
 // ---------------------------------------------------------------------------
@@ -216,6 +238,51 @@ export interface WidgetActionMap {
     res: NostrQueryResponse;
   };
 
+  'nostr:sign': {
+    req: NostrSignRequest;
+    res: NostrSignResponse;
+  };
+
+  'nostr:nip44Encrypt': {
+    req: NostrNip44EncryptRequest;
+    res: NostrNip44EncryptResponse;
+  };
+
+  'nostr:subscribe': {
+    req: NostrSubscribeRequest;
+    res: NostrSubscribeResponse;
+  };
+
+  'nostr:unsubscribe': {
+    req: NostrUnsubscribeRequest;
+    res: NostrUnsubscribeResponse;
+  };
+
+  'storage:get': {
+    req: StorageGetRequest;
+    res: StorageGetResponse;
+  };
+
+  'storage:set': {
+    req: StorageSetRequest;
+    res: StorageSetResponse;
+  };
+
+  'storage:remove': {
+    req: StorageRemoveRequest;
+    res: StorageRemoveResponse;
+  };
+
+  'storage:keys': {
+    req: StorageKeysRequest;
+    res: StorageKeysResponse;
+  };
+
+  'context:getRepo': {
+    req: ContextGetRepoRequest;
+    res: ContextGetRepoResponse;
+  };
+
   'ui:toast': {
     req: UiToastRequest;
     res: UiToastResponse;
@@ -223,6 +290,11 @@ export interface WidgetActionMap {
   'ui:resize': {
     req: UiResizeRequest;
     res: UiResizeResponse;
+  };
+
+  'ui:navigate': {
+    req: UiNavigateRequest;
+    res: UiNavigateResponse;
   };
 
   // Host → Extension events (one-way)
@@ -247,6 +319,10 @@ export interface WidgetActionMap {
   'context:update': {
     event: WidgetContext;
   };
+  'nostr:subscription:event': {
+    event: NostrSubscriptionEvent;
+  };
+  /** Legacy alias — the host currently pushes subscription events as `nostr:subscription:event`. */
   'nostr:event': {
     event: NostrSubscriptionEvent;
   };
@@ -270,7 +346,7 @@ export type WidgetEventAction = {
 }[WidgetAction];
 
 // ---------------------------------------------------------------------------
-// Wire message shapes (compatible with BudaBit host bridge)
+// Wire message shapes (compatible with Budabit host bridge)
 // ---------------------------------------------------------------------------
 
 export type WidgetRequestMessage<A extends WidgetRequestAction = WidgetRequestAction> = {
@@ -368,6 +444,21 @@ export const SmartWidgetNostrEventSchema = z.object({
 
 /**
  * Convenience type for permissions declared in widget tags.
- * BudaBit's host enforces these by comparing against requested actions.
+ * Budabit's host enforces these by comparing against requested actions.
  */
-export type WidgetPermission = 'nostr:publish' | 'nostr:query' | 'ui:toast' | (string & {});
+export type WidgetPermission =
+  | 'nostr:publish'
+  | 'nostr:query'
+  | 'nostr:sign'
+  | 'nostr:nip44Encrypt'
+  | 'nostr:subscribe'
+  | 'nostr:unsubscribe'
+  | 'storage:get'
+  | 'storage:set'
+  | 'storage:remove'
+  | 'storage:keys'
+  | 'context:getRepo'
+  | 'ui:toast'
+  | 'ui:resize'
+  | 'ui:navigate'
+  | (string & {});

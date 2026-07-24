@@ -359,7 +359,7 @@ async function handleSubscribe(payload, ext) {
     filters: [validatedFilter],
     signal: controller.signal,
     onEvent: (event) => {
-      ext.bridge.post("nostr:event", { subscriptionId, event })
+      ext.bridge.post("nostr:subscription:event", { subscriptionId, event })
     },
     onEose: (relay) => {
       ext.bridge.post("nostr:eose", { subscriptionId, relay })

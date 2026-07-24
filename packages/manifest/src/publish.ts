@@ -231,12 +231,12 @@ async function publishWidget(options: PublishOptions): Promise<void> {
 
     if (successful.length > 0) {
       console.log(`✅ Published to ${successful.length} relay(s):`);
-      successful.forEach(r => console.log(`   - ${r}`));
+      successful.forEach(r => { console.log(`   - ${r}`); });
     }
 
     if (failed.length > 0) {
       console.log(`⚠️  Failed on ${failed.length} relay(s):`);
-      failed.forEach(r => console.log(`   - ${r}`));
+      failed.forEach(r => { console.log(`   - ${r}`); });
     }
   } finally {
     pool.close(relays);
@@ -259,7 +259,7 @@ async function publishWidget(options: PublishOptions): Promise<void> {
   console.log(`   Event ID: ${signedEvent.id}`);
   console.log(`   Pubkey: ${signedEvent.pubkey}`);
   console.log(`   Identifier (d): ${identifier}`);
-  console.log(`\n🔗 naddr (use this to install in BudaBit):`);
+  console.log(`\n🔗 naddr (use this to install in Budabit):`);
   console.log(`   ${naddr}`);
   console.log(`\n📦 npub:`);
   console.log(`   ${nip19.npubEncode(signedEvent.pubkey)}`);
