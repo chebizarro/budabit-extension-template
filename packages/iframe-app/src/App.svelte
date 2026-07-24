@@ -3,6 +3,7 @@
     WidgetBridge,
     createWidgetBridge,
     createTextNote,
+    watchHostTheme,
     type UnsignedEvent,
     type WidgetInitPayload,
     type RepoContext,
@@ -29,6 +30,9 @@
 
     bridge = b;
     status = 'Ready. Waiting for host context...';
+
+    // Match the host application's theme (light/dark + background)
+    const offTheme = watchHostTheme(b);
     lastPublishResult = null;
     lastError = null;
 
@@ -60,6 +64,7 @@
     b.signalReady();
 
     return () => {
+      offTheme();
       offInit();
       offRepoUpdate();
       // offContextUpdate(); // Uncomment with the legacy fallback above.
@@ -241,12 +246,65 @@
 </div>
 
 <style>
+  /* Theme tokens — the budabit-sdk theme helpers set `data-theme` on <html>
+     from the host's widget:init / widget:themeChanged events. */
+  :global(:root) {
+    color-scheme: light;
+    --ext-bg: #f5f5f5;
+    --ext-surface: #ffffff;
+    --ext-surface-2: #f8f9fa;
+    --ext-text: #333333;
+    --ext-text-muted: #666666;
+    --ext-border: #dddddd;
+    --ext-border-subtle: #eeeeee;
+    --ext-shadow: rgba(0, 0, 0, 0.1);
+    --ext-accent: #007bff;
+    --ext-accent-hover: #0056b3;
+    --ext-accent-text: #ffffff;
+    --ext-disabled: #cccccc;
+    --ext-warning-bg: #fff3cd;
+    --ext-warning-border: #ffc107;
+    --ext-warning-text: #856404;
+    --ext-success-bg: #d4edda;
+    --ext-success-border: #28a745;
+    --ext-success-text: #155724;
+    --ext-danger-bg: #f8d7da;
+    --ext-danger-border: #dc3545;
+    --ext-danger-text: #721c24;
+  }
+
+  :global([data-theme='dark']) {
+    color-scheme: dark;
+    --ext-bg: #151c23;
+    --ext-surface: #1e2831;
+    --ext-surface-2: #18212a;
+    --ext-text: #e6ebf0;
+    --ext-text-muted: #98a6b3;
+    --ext-border: #374757;
+    --ext-border-subtle: #2c3947;
+    --ext-shadow: rgba(0, 0, 0, 0.5);
+    --ext-accent: #3b96ff;
+    --ext-accent-hover: #63abff;
+    --ext-accent-text: #ffffff;
+    --ext-disabled: #3d4a56;
+    --ext-warning-bg: #3f3520;
+    --ext-warning-border: #b58a1f;
+    --ext-warning-text: #e8c869;
+    --ext-success-bg: #14321f;
+    --ext-success-border: #2f9e57;
+    --ext-success-text: #7fd6a0;
+    --ext-danger-bg: #3b1d21;
+    --ext-danger-border: #e05260;
+    --ext-danger-text: #f1a7ad;
+  }
+
   :global(body) {
     margin: 0;
     padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
       sans-serif;
-    background: #f5f5f5;
+    background: var(--host-background, var(--ext-bg));
+    color: var(--ext-text);
   }
 
   .container {
@@ -262,41 +320,41 @@
 
   h1 {
     margin: 0 0 0.5rem 0;
-    color: #333;
+    color: var(--ext-text);
   }
 
   .status {
     padding: 0.5rem 1rem;
-    background: #fff3cd;
-    border: 1px solid #ffc107;
+    background: var(--ext-warning-bg);
+    border: 1px solid var(--ext-warning-border);
     border-radius: 4px;
-    color: #856404;
+    color: var(--ext-warning-text);
     font-size: 0.9rem;
   }
 
   .status.ready {
-    background: #d4edda;
-    border-color: #28a745;
-    color: #155724;
+    background: var(--ext-success-bg);
+    border-color: var(--ext-success-border);
+    color: var(--ext-success-text);
   }
 
   section {
-    background: white;
+    background: var(--ext-surface);
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px var(--ext-shadow);
   }
 
   h2 {
     margin: 0 0 1rem 0;
-    color: #333;
+    color: var(--ext-text);
     font-size: 1.25rem;
   }
 
   h3 {
     margin: 0 0 0.75rem 0;
-    color: #666;
+    color: var(--ext-text-muted);
     font-size: 1rem;
   }
 
@@ -309,12 +367,12 @@
 
   dt {
     font-weight: 600;
-    color: #666;
+    color: var(--ext-text-muted);
   }
 
   dd {
     margin: 0;
-    color: #333;
+    color: var(--ext-text);
   }
 
   .pubkey {
@@ -330,9 +388,9 @@
   .context-raw pre {
     margin: 0.75rem 0 0 0;
     padding: 0.75rem;
-    background: #f8f9fa;
+    background: var(--ext-surface-2);
     border-radius: 6px;
-    border: 1px solid #eee;
+    border: 1px solid var(--ext-border-subtle);
     overflow: auto;
     font-size: 0.85rem;
   }
@@ -353,9 +411,11 @@
   input[type='text'] {
     flex: 1;
     padding: 0.5rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--ext-border);
     border-radius: 4px;
     font-size: 1rem;
+    background: var(--ext-surface);
+    color: var(--ext-text);
   }
 
   .button-group {
@@ -366,8 +426,8 @@
 
   button {
     padding: 0.5rem 1rem;
-    background: #007bff;
-    color: white;
+    background: var(--ext-accent);
+    color: var(--ext-accent-text);
     border: none;
     border-radius: 4px;
     font-size: 1rem;
@@ -376,27 +436,27 @@
   }
 
   button:hover:not(:disabled) {
-    background: #0056b3;
+    background: var(--ext-accent-hover);
   }
 
   button:disabled {
-    background: #ccc;
+    background: var(--ext-disabled);
     cursor: not-allowed;
   }
 
   .result {
     margin: 0.75rem 0 0 0;
-    color: #333;
+    color: var(--ext-text);
     font-size: 0.95rem;
   }
 
   .error {
     margin-top: 1rem;
     padding: 0.75rem;
-    border: 1px solid #dc3545;
-    background: #f8d7da;
+    border: 1px solid var(--ext-danger-border);
+    background: var(--ext-danger-bg);
     border-radius: 6px;
-    color: #721c24;
+    color: var(--ext-danger-text);
   }
 
   .waiting {
@@ -405,6 +465,6 @@
 
   .waiting p {
     margin: 0.5rem 0;
-    color: #666;
+    color: var(--ext-text-muted);
   }
 </style>
