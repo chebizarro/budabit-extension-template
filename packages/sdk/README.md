@@ -5,7 +5,7 @@ SDK for building [Budabit](https://budabit.dev) Smart Widget extensions.
 ## Install
 
 ```bash
-npm install budabit-sdk@^0.2.0
+npm install budabit-sdk@^0.3.0
 ```
 
 ## Usage
@@ -112,15 +112,42 @@ const bridge = createWorkerBridge((msg) => self.postMessage(msg));
 self.addEventListener('message', (e) => bridge.handleMessage(e.data));
 ```
 
+### Host theme
+
+Widgets are hosted inside an iframe, and the Budabit host communicates its UI
+theme via `widget:init` (initial `theme`/`themeBackground` fields) and
+`widget:themeChanged` events. `watchHostTheme` wires this up in one call: it
+seeds a `prefers-color-scheme` fallback so there's no light-mode flash before
+the host connects, then applies every subsequent theme change.
+
+```ts
+import { createWidgetBridge, watchHostTheme } from 'budabit-sdk';
+
+const bridge = createWidgetBridge({ targetWindow: window.parent, targetOrigin: '*' });
+const unwatch = watchHostTheme(bridge); // seeds + applies data-theme/color-scheme/--host-background
+
+bridge.signalReady();
+
+// later, on teardown
+unwatch();
+```
+
+`watchHostTheme` sets `document.documentElement.dataset.theme` to `"light"` or
+`"dark"` (style with `[data-theme='dark'] { ... }`), syncs `color-scheme` so
+native form controls/scrollbars match, and exposes the host's effective
+background as the `--host-background` CSS custom property. Use
+`applyHostTheme`/`seedHostThemeFallback` directly if you need more control
+than the bridge-wired helper provides.
+
 ## Typed host actions
 
-Version 0.2.0 includes typed requests for Nostr publish/query/sign/NIP-44 encryption/subscriptions, storage, repository context, toast/resize/navigation, plus string overloads for host-specific actions.
+Version 0.2.0 added typed requests for Nostr publish/query/sign/NIP-44 encryption/subscriptions, storage, repository context, toast/resize/navigation, plus string overloads for host-specific actions. Version 0.3.0 adds the host theme helpers (`applyHostTheme`, `seedHostThemeFallback`, `watchHostTheme`).
 
 ## Subpath Exports
 
 | Import | Contents |
 |--------|----------|
-| `budabit-sdk` | Types, WidgetBridge, signaling helpers |
+| `budabit-sdk` | Types, WidgetBridge, signaling helpers, host theme helpers |
 | `budabit-sdk/manifest` | Event generator, CLI utilities |
 | `budabit-sdk/testing` | MockWidgetBridge, test helpers |
 | `budabit-sdk/worker` | Worker bridge |

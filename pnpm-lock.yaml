@@ -58,7 +58,7 @@ importers:
   packages/iframe-app:
     dependencies:
       budabit-sdk:
-        specifier: workspace:^0.2.0
+        specifier: workspace:^0.3.0
         version: link:../sdk
     devDependencies:
       '@sveltejs/vite-plugin-svelte':

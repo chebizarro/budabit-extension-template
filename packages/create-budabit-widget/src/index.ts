@@ -54,7 +54,7 @@ function scaffold(projectName: string, options: ScaffoldOptions) {
 
   // Resolve SDK path for --local mode
   const sdkDir = resolve(__dirname, '..', '..', 'sdk');
-  const sdkRef = options.local ? `file:${sdkDir}` : '^0.2.0';
+  const sdkRef = options.local ? `file:${sdkDir}` : '^0.3.0';
 
   if (options.local) {
     console.log(`  Using local SDK: ${sdkDir}`);

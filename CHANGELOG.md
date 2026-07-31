@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - Unreleased
+
+### Added
+
+- `budabit-sdk` now ships host theme helpers (`applyHostTheme`, `seedHostThemeFallback`, `watchHostTheme`) in the published package. The `theme.ts` module existed in source and was exported from the main entry point, but was added to the repo after the `budabit-sdk@0.2.0` publish cut, so the npm tarball for 0.2.0 predates it and has no `dist/theme.js`. 0.3.0 includes it.
+- Documented the host theme helpers in the SDK README.
+
+### Changed
+
+- Bumped `create-budabit-widget` and the scaffolded template's `budabit-sdk` dependency to `^0.3.0`.
+
 ## [0.2.0] - Unreleased
 
 ### Changed

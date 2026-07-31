@@ -1,6 +1,6 @@
 # My Budabit Widget
 
-A [Budabit](https://budabit.dev) Smart Widget extension using `budabit-sdk@^0.2.0`.
+A [Budabit](https://budabit.dev) Smart Widget extension using `budabit-sdk@^0.3.0`.
 
 ## What is a Smart Widget?
 
@@ -128,7 +128,7 @@ Your widget code lives in `packages/iframe-app/`. The `budabit-sdk` package prov
 
 | Import | Contents |
 |--------|----------|
-| `budabit-sdk` | Types, WidgetBridge, signaling helpers |
+| `budabit-sdk` | Types, WidgetBridge, signaling helpers, host theme helpers |
 | `budabit-sdk/manifest` | Event generator, CLI utilities |
 | `budabit-sdk/testing` | MockWidgetBridge, test helpers |
 | `budabit-sdk/worker` | Worker bridge |

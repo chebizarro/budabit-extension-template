@@ -1,6 +1,6 @@
 # Budabit Smart Widget Template
 
-Reusable starter template for building Budabit **Smart Widgets** with `budabit-sdk@^0.2.0`.
+Reusable starter template for building Budabit **Smart Widgets** with `budabit-sdk@^0.3.0`.
 
 This template provides a production-ready foundation for creating **iframe-based Smart Widgets** that integrate with BudaBit using:
 
@@ -26,7 +26,7 @@ BudaBit discovers and renders widgets based on these events and enforces privile
 ## Template Features
 
 - Svelte 5 iframe app example (Smart Widget "tool" pattern)
-- `budabit-sdk` 0.2.0 with typed bridge, lifecycle, subscriptions, manifest tooling, worker bridge, and test helpers
+- `budabit-sdk` 0.3.0 with typed bridge, lifecycle, subscriptions, manifest tooling, worker bridge, and test helpers
 - TypeScript strict mode
 - Monorepo via pnpm workspaces
 - Unit tests (Vitest) + E2E tests (Playwright)
@@ -197,7 +197,7 @@ The SDK provides everything you need to build a Smart Widget:
 
 | Import | Contents |
 |--------|----------|
-| `budabit-sdk` | Types, `WidgetBridge`, `createWidgetBridge()`, signaling helpers (`createEvent`, `validateEvent`) |
+| `budabit-sdk` | Types, `WidgetBridge`, `createWidgetBridge()`, signaling helpers (`createEvent`, `validateEvent`), host theme helpers |
 | `budabit-sdk/manifest` | Event generator, CLI utilities |
 | `budabit-sdk/testing` | `MockWidgetBridge`, test helpers |
 | `budabit-sdk/worker` | Worker bridge for headless extensions |
