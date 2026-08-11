@@ -7,6 +7,7 @@
     type WidgetInitPayload,
     type RepoContext,
   } from 'budabit-sdk';
+  import { onMount } from 'svelte';
   import { watchHostTheme } from './host-theme';
 
   // Bridge + host-provided context
@@ -21,7 +22,7 @@
   let lastError = $state<string | null>(null);
 
   // Initialize bridge and set up handlers
-  $effect(() => {
+  onMount(() => {
     const b = createWidgetBridge({
       targetWindow: window.parent,
       targetOrigin: '*',
